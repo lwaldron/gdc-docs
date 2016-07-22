@@ -817,34 +817,22 @@
       return null;
     }
 
-    var dictDataList = _sanitizeDictionaryData(data),
-        dictionaryData = {dictionaries: [], dictionaryMap: dictDataList, dictionaryMapByCategory: {}};
+    var dictDataList = _sanitizeDictionaryData(data);
 
-    var dictionaryKeys = _.keys(dictDataList);
-
-    for (var i = 0; i < dictionaryKeys.length; i++) {
-      var dictionaryKey = dictionaryKeys[i];
-
-      // Add special private data prefixed with '_' to the dictionary data object directly...
-      if (dictionaryKey[0] === '_') {
-        dictionaryData[dictionaryKey.substr(1)] = dictDataList[dictionaryKey];
-        delete dictDataList[dictionaryKey];
-      }
-
-    }
     // Build our data structures and corresponding caches
-    return _.reduce(dictDataList, (acc, dictionary) => {
-      if (dictionary.category) {
-        if (dictDataList.hasOwnProperty(dictionary.title)) {
-          acc.dictionaries.push(dictionary);
+    return _.reduce(dictDataList, function (acc, dictionary, dictionaryTitle) {
+      if (dictionaryTitle[0] === '_') {
+        // Add special private data prefixed with '_' to the dictionary data object top level
+        acc[dictionaryTitle.substr(1)] = dictionary;
+      } else if (dictionary.category) {
+        // otherwise add it to dictionaries array
+        if (dictDataList.hasOwnProperty(dictionaryTitle)) {
+          acc.dictionaries = acc.dictionaries.concat(dictionary);
         }
-        if (! _.isArray(dictionaryData.dictionaryMapByCategory[dictionary.category]) ) {
-          acc.dictionaryMapByCategory[dictionary.category] = [];
-        }
-        acc.dictionaryMapByCategory[dictionary.category].push(dictionary);
+        acc.dictionaryMapByCategory[dictionary.category] = (acc.dictionaryMapByCategory[dictionary.category] || []).concat(dictionary);
       }
       return acc;
-    }, dictionaryData);
+    }, {dictionaries: [], dictionaryMap: dictDataList, dictionaryMapByCategory: {}});
   }
   /////////////////////////////////////////////////////////
 
