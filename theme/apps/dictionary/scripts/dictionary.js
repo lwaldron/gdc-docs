@@ -832,26 +832,19 @@
       }
 
     }
-
-    //console.log(dictionaryData);
-
     // Build our data structures and corresponding caches
-    for (var dictionaryTitle in dictDataList) {
-      var dictionary = dictDataList[dictionaryTitle],
-        dictionaryCategory = dictionary.category || 'Unknown';
-
-      if (dictDataList.hasOwnProperty(dictionaryTitle)) {
-        dictionaryData.dictionaries.push(dictionary);
+    return _.reduce(dictDataList, (acc, dictionary) => {
+      if (dictionary.category) {
+        if (dictDataList.hasOwnProperty(dictionary.title)) {
+          acc.dictionaries.push(dictionary);
+        }
+        if (! _.isArray(dictionaryData.dictionaryMapByCategory[dictionary.category]) ) {
+          acc.dictionaryMapByCategory[dictionary.category] = [];
+        }
+        acc.dictionaryMapByCategory[dictionary.category].push(dictionary);
       }
-
-      if (! _.isArray(dictionaryData.dictionaryMapByCategory[dictionaryCategory]) ) {
-        dictionaryData.dictionaryMapByCategory[dictionaryCategory] = [];
-      }
-
-      dictionaryData.dictionaryMapByCategory[dictionaryCategory].push(dictionary);
-    }
-
-    return dictionaryData;
+      return acc;
+    }, dictionaryData);
   }
   /////////////////////////////////////////////////////////
 
